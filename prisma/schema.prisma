@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  name               String?
+  productWebsiteUrl  String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  workspaces          Workspace[]
+  linkedinAccount     LinkedInAccount?
+  carousels           Carousel[]
+  otpCodes            OtpCode[]
+  brandKit            BrandKit?
+  scheduledPosts      ScheduledPost[]
+  textPosts           TextPost[]
+  workspaceMembers    WorkspaceMember[]
+  subscription        Subscription?
+  autoScheduleConfig  AutoScheduleConfig?
+}
+
+model OtpCode {
+  id        String    @id @default(cuid())
+  email     String
+  codeHash  String
+  purpose   String    @default("login")
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  timezone  String   @default("Asia/Kolkata")
+  createdAt DateTime @default(now())
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  carousels Carousel[]
+  members   WorkspaceMember[]
+  invites   TeamInvite[]
+}
+
+model LinkedInAccount {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  linkedinUrn  String
+  displayName  String?
+  profileEmail String?
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime
+  connectedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Carousel {
+  id              String   @id @default(cuid())
+  title           String
+  slides          String
+  status          String   @default("draft")
+  templateId      String?
+  renderedImages  String?  // JSON array of base64 PNG data URLs, set on save-as-complete
+  caption         String?  // AI-generated LinkedIn caption, set on save-as-complete
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  scheduledPosts ScheduledPost[]
+}
+
+model BrandKit {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  logoData    String?
+  colors      String   @default("[]")
+  headingFont String   @default("Inter")
+  bodyFont    String   @default("Inter")
+  accentColor String   @default("#3b82f6")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ScheduledPost {
+  id              String    @id @default(cuid())
+  carouselId      String
+  userId          String
+  scheduledAt     DateTime
+  status          String    @default("scheduled")
+  autoComment     String?
+  linkedinPostId  String?
+  errorMsg        String?
+  isAutoScheduled Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  carousel Carousel @relation(fields: [carouselId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String   @default("editor")
+  joinedAt    DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model TeamInvite {
+  id          String   @id @default(cuid())
+  workspaceId String
+  email       String
+  role        String   @default("editor")
+  token       String   @unique
+  status      String   @default("pending")
+  invitedById String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model TextPost {
+  id              String    @id @default(cuid())
+  userId          String
+  content         String
+  imageData       String?
+  status          String    @default("draft")
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  linkedinPostId  String?
+  errorMsg        String?
+  isAutoScheduled Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AutoScheduleConfig {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  enabled     Boolean  @default(false)
+  postsPerDay Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  plan             String    @default("free")
+  status           String    @default("active")
+  stripeCustomerId String?   @unique
+  stripePriceId    String?
+  stripeSubId      String?   @unique
+  periodEnd        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
