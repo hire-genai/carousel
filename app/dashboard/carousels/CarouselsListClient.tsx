@@ -16,8 +16,7 @@ type CanvasEl = {
 
 interface SlidePreview {
   bg: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  elements: any[];
+  elements: Array<Record<string, unknown>>;
 }
 
 interface Carousel {

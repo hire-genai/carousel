@@ -1385,7 +1385,7 @@ export default function CarouselGeneratorClient({ linkedinConnected, linkedinNam
                   {/* Empty canvas hint */}
                   {(slide?.elements?.length ?? 1) === 0 && !slide?.bgImage && (
                     <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 10, pointerEvents: "none" }}>
-                      <p style={{ color: "rgba(255,255,255,0.12)", fontSize: 14, fontFamily: "Inter,sans-serif" }}>Click "Add Heading" to start</p>
+                      <p style={{ color: "rgba(255,255,255,0.12)", fontSize: 14, fontFamily: "Inter,sans-serif" }}>{`Click "Add Heading" to start`}</p>
                     </div>
                   )}
 

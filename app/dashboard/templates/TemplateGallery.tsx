@@ -205,7 +205,7 @@ function TemplatePreview({ template }: { template: Template }) {
         {/* Footer tagline */}
         <div className="px-4 pb-4">
           <span className="text-[7.5px] font-semibold" style={{ color: accentColor }}>
-            // {footer}
+            {`// ${footer}`}
           </span>
         </div>
       </div>
