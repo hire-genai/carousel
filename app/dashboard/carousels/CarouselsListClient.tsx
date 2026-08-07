@@ -16,7 +16,7 @@ type CanvasEl = {
 
 interface SlidePreview {
   bg: string;
-  elements: Array<Record<string, unknown>>;
+  elements: CanvasEl[];
 }
 
 interface Carousel {
