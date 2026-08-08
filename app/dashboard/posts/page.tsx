@@ -13,11 +13,18 @@ export default async function MyPostsPage() {
   const session = await getCurrentSession();
   if (!session) redirect("/login");
 
-  const posts = await prisma.textPost.findMany({
+  const postsRaw = await prisma.textPost.findMany({
     where: { userId: session.userId, status: { in: NON_DRAFT_STATUSES } },
     orderBy: { updatedAt: "desc" },
     select: { id: true, content: true, status: true, scheduledAt: true, publishedAt: true, updatedAt: true, imageData: true, linkedinPostId: true },
   });
+
+  const posts = postsRaw.map((p) => ({
+    ...p,
+    scheduledAt: p.scheduledAt ? p.scheduledAt.toISOString() : null,
+    publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
+    updatedAt: p.updatedAt.toISOString(),
+  }));
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
