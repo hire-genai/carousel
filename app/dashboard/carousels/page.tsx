@@ -20,9 +20,17 @@ const DEFAULT_GRADIENTS = [
   "linear-gradient(135deg,#65A30D,#059669)",
 ];
 
-type RawEl = Record<string, unknown>;
+type CanvasEl = {
+  id: string; x: number; y: number; w: number; h: number;
+  text: string; fontSize: number; bold: boolean; italic: boolean;
+  underline: boolean; strikethrough: boolean; color: string;
+  fontFamily: string; textAlign: string; lineHeight?: number;
+  letterSpacing?: number; textTransform?: string;
+  shape?: string; fillColor?: string; borderColor?: string;
+  borderWidth?: number; borderRadius?: number; locked?: boolean; rotate?: number;
+};
 
-function getSlidePreviews(slidesJson: string, fallbackGradient: string) {
+function getSlidePreviews(slidesJson: string, fallbackGradient: string): Array<{ bg: string; elements: CanvasEl[] }> {
   try {
     const slides = JSON.parse(slidesJson);
     if (!Array.isArray(slides) || slides.length === 0) {
@@ -36,7 +44,7 @@ function getSlidePreviews(slidesJson: string, fallbackGradient: string) {
         if (design?.bgGradient) bg = design.bgGradient;
         else if (design?.bgType === "solid" && design?.bgColor) bg = design.bgColor;
       }
-      const elements = Array.isArray(s?.elements) ? (s.elements as RawEl[]) : [];
+      const elements = Array.isArray(s?.elements) ? (s.elements as CanvasEl[]) : [];
       return { bg, elements: elements ?? [] };
     });
   } catch {
