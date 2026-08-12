@@ -4,10 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2026-06-24.dahlia",
-});
-
 function planFromPriceId(priceId: string | null | undefined): string {
   if (!priceId) return "free";
   if (priceId === process.env.STRIPE_PRICE_PRO) return "pro";
@@ -16,6 +12,9 @@ function planFromPriceId(priceId: string | null | undefined): string {
 }
 
 export async function POST(req: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+    apiVersion: "2026-06-24.dahlia",
+  });
   const body = await req.text();
   const sig = req.headers.get("stripe-signature") ?? "";
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";

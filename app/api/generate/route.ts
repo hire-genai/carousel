@@ -6,9 +6,8 @@ import { getCurrentSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import type { GenerateRequest, CarouselData } from "@/lib/types";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 export async function POST(req: NextRequest) {
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   try {
     const body: GenerateRequest & { audience?: string; tone?: string; topic?: string; keyPoints?: string[]; painPoints?: string[] } = await req.json();
     let { mode, content, numSlides, audience, tone, topic, keyPoints, painPoints } = body;
