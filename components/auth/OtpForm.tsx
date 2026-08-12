@@ -139,11 +139,11 @@ export default function OtpForm({ mode, next }: Props) {
         </p>
       </div>
 
-      {devOtp && (
+      {devOtp && process.env.NODE_ENV === "development" && (
         <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-xs">
           <span className="font-bold">DEV:</span> Your code is{" "}
           <span className="font-mono text-sm">{devOtp}</span>
-          <p className="text-amber-300/60 mt-1">(shown only in development, remove in production)</p>
+          <p className="text-amber-300/60 mt-1">(shown only in development)</p>
         </div>
       )}
 

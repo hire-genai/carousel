@@ -765,6 +765,14 @@ export default function CarouselGeneratorClient({ linkedinConnected, linkedinNam
     setTimeout(() => setToast(null), 3000);
   }, []);
 
+  const [successCard, setSuccessCard] = useState<{ title: string; subtitle: string } | null>(null);
+  const showSuccessCard = useCallback((title: string, subtitle: string) => {
+    setSuccessCard({ title, subtitle });
+    setTimeout(() => {
+      router.push("/dashboard/carousels");
+    }, 2500);
+  }, [router]);
+
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [downloadIndices, setDownloadIndices] = useState<Set<number>>(new Set());
   const [downloading, setDownloading] = useState(false);
@@ -961,7 +969,11 @@ export default function CarouselGeneratorClient({ linkedinConnected, linkedinNam
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "Save failed");
       if (!savedId && d.id) setSavedId(d.id);
-      showToast(status === "complete" ? "Saved as complete!" : "Draft saved!");
+      if (status === "complete") {
+        showSuccessCard("Carousel Saved! 🎉", "Your carousel has been saved successfully.");
+      } else {
+        showSuccessCard("Draft Saved!", "Your draft has been saved. You can continue editing anytime.");
+      }
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Save failed", "err");
     } finally {
@@ -1006,7 +1018,6 @@ export default function CarouselGeneratorClient({ linkedinConnected, linkedinNam
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "Publish failed");
       setPublishOpen(false);
-      showToast("Posted to LinkedIn!");
       if (savedId) {
         await fetch(`/api/carousels/${savedId}`, {
           method: "PATCH",
@@ -1014,6 +1025,7 @@ export default function CarouselGeneratorClient({ linkedinConnected, linkedinNam
           body: JSON.stringify({ status: "published" }),
         }).catch(() => {});
       }
+      showSuccessCard("Posted to LinkedIn! 🚀", "Your carousel is now live. Redirecting to your carousels...");
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Publish failed", "err");
     } finally {
@@ -1583,6 +1595,30 @@ export default function CarouselGeneratorClient({ linkedinConnected, linkedinNam
       {toast && (
         <div className={`fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-semibold transition-all ${toast.type === "ok" ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-red-500/20 border-red-500/30 text-red-300"}`}>
           {toast.type === "ok" ? "✓" : "✕"} {toast.msg}
+        </div>
+      )}
+
+      {/* ── Success Card ── */}
+      {successCard && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#16161e] border border-white/10 rounded-2xl shadow-2xl p-10 flex flex-col items-center gap-5 max-w-sm w-full mx-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center text-3xl">
+              ✓
+            </div>
+            <div>
+              <p className="text-white text-xl font-bold mb-1">{successCard.title}</p>
+              <p className="text-white/50 text-sm">{successCard.subtitle}</p>
+            </div>
+            <div className="w-full flex flex-col gap-2 mt-2">
+              <button
+                onClick={() => router.push("/dashboard/carousels")}
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition"
+              >
+                View My Carousels →
+              </button>
+              <p className="text-white/30 text-xs">Redirecting automatically in 2s…</p>
+            </div>
+          </div>
         </div>
       )}
 

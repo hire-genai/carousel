@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const code = await createOtp(normalized, purpose);
-    deliverOtp(normalized, code, purpose);
+    await deliverOtp(normalized, code, purpose);
 
     // In dev, return the OTP in the response so the user can test easily.
     // Remove this in production.
